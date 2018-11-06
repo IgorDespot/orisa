@@ -12,7 +12,8 @@ const wit_token = config.witToken;
 const slack_token = config.slackToken;
 const slackLogLevel = 'info';
 
-const witClient = require('../server/witClient')(wit_token);
+const WitClient = require('../server/witClient');
+const witClient = new WitClient(wit_token);
 
 const serviceRegistry = service.get('serviceRegistry');
 
