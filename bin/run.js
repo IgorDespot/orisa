@@ -21,9 +21,9 @@ const rtm = slackClient.init(slack_token, slackLogLevel, witClient, serviceRegis
 rtm.start();
 
 slackClient.addAuthenicatedHanler(rtm, function() {
-    server.listen(3000);
+	server.listen(3000);
 });
 
 server.on('listening', () => {
-    console.log(`Server is listening on ${server.address().port} in ${service.get('env')} mode.`);
+	console.log(`Server is listening on ${server.address().port} in ${service.get('env')} mode.`);
 });
