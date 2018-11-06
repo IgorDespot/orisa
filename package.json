@@ -4,7 +4,7 @@
   "description": "Simple slack bot project for learning.",
   "main": "server/service.js",
   "scripts": {
-    "test": "NODE_EVN=test eslint bin server && nyc mocha --recursive test",
+    "test": "NODE_EVN=test snyk test && eslint bin server && nyc mocha --recursive test",
     "start": "node bin/run"
   },
   "engines": {
