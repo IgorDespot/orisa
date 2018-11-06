@@ -4,16 +4,30 @@
   "description": "Simple slack bot project for learning.",
   "main": "server/service.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_EVN=test eslint bin server && nyc mocha --recursive test",
+    "start": "node bin/run"
+  },
+  "engines": {
+    "node": "10.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IgorDespot/orisa.git"
   },
   "author": "Igor Despot",
   "license": "ISC",
   "dependencies": {
     "@slack/client": "^4.8.0",
+    "bunyan": "^1.8.12",
+    "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "superagent": "^4.0.0-beta.5"
   },
   "devDependencies": {
-    "nodemon": "^1.18.5"
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.5",
+    "nyc": "^13.1.0",
+    "should": "^13.2.3",
+    "supertest": "^3.3.0"
   }
 }

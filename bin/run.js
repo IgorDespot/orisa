@@ -1,27 +1,24 @@
 'use strict';
 
-const slackClient = require('../server/slackClient');
-const service = require('../server/service');
-const http = require('http');
+const config = require('../config');
+const log = config.log();
 
+const SlackClient = require('../server/slackClient');
+const service = require('../server/service')(config);
+const http = require('http');
 const server = http.createServer(service);
 
-const wit_token = 'GLO2LOJK2GHGDLLTY4B3LWXIOWZIWYV6'
-const slack_token = 'xoxb-467393544166-465993206002-fGNCMPoSsnoTj8XLHP1lEZ3Q';
-const slackLogLevel = 'info';
-
-const witClient = require('../server/witClient')(wit_token);
+const witToken = config.witToken;
+const WitClient = require('../server/witClient');
+const witClient = new WitClient(witToken);
 
 const serviceRegistry = service.get('serviceRegistry');
+const slackClient = new SlackClient(config.slackToken, config.slackLogLevel, witClient, serviceRegistry, log);
 
-const rtm = slackClient.init(slack_token, slackLogLevel, witClient, serviceRegistry);
-
-rtm.start();
-
-slackClient.addAuthenicatedHanler(rtm, function() {
-    server.listen(3000);
+slackClient.start(() => {
+	server.listen(3000);
 });
 
-server.on('listening', () => {
-    console.log(`Server is listening on ${server.address().port} in ${service.get('env')} mode.`);
+server.on('listening', function() {
+	log.info(`ORISA is listening on ${server.address().port} in ${service.get('env')} mode.`);
 });

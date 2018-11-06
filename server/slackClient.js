@@ -1,65 +1,66 @@
 'use strict';
 
 const RtmClient = require('@slack/client').RTMClient;
-let rtm = null;
-let nlp = null;
-let registry = null;
 
-function handleOnAuthenticated(rtmStartData) {
-    console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
-};
 
-function addAuthenticatedHandler(rtm, handler) {
-    rtm.on('authenticated', handler);
-};
+class SlackClient {
+	constructor(token, logLevel, nlp, registry, log) {
+		this._rtm = new RtmClient(token, { logLevel: logLevel });
+		this._nlp = nlp;
+		this._registry = registry;
+		this._log = log;
 
-function handleOnMessage(message) {
-    if (message.text.toLowerCase().includes('orisa')) {
-        nlp.ask(message.text, function(err, res) {
-            if (err) {
-                console.log(err);
-                return;
-            }
+		this._addAuthenticatedHandler(this._handleOnAuthenticated);
+		this._rtm.on('message', this._handleOnMessage.bind(this));
+	}
 
-            try {
-                if (!res.intent || !res.intent[0] || !res.intent[0].value) {
-                    throw new Error('Could not extract intent.');
-                }
+	_handleOnAuthenticated(rtmStartData) {
+		this._log.info(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
+	}
 
-                const intent = require('./intents/' + res.intent[0].value + 'Intent');
+	_addAuthenticatedHandler(handler) {
+		this._rtm.on('authenticated', handler.bind(this));
+	}
 
-                intent.process(res, registry, function(error, response) {
-                    if(error) {
-                        console.log(error.message);
-                        return;
-                    }
+	_handleOnMessage(message) {
+		if (message.text.toLowerCase().includes('orisa')) {
+			this._nlp.ask(message.text, (err, res) => {
+				if (err) {
+					this._log.error(err);
+					return;
+				}
 
-                    return rtm.sendMessage(response, message.channel);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log(res);
-                if (!res.intent) {
-                    return rtm.sendMessage("Sorry, I don't know what you are talking about.", message.channel);
-                } else if (!res.intent[0].value == 'time' && !res.location) {
-                    return rtm.sendMessage(`I don't yet know the time in ${res.location[0].value}`, message.channel);
-                } else {
-                    console.log(res);
-                    return rtm.sendMessage("Sorry, I don't know what you are talking about.", message.channel);
-                }
-            }
-        });
-    }
-};
- 
-module.exports.init = function slackClient(token, slacklogLevel, nlpClient, serviceRegistry) {
-    rtm = new RtmClient(token, { logLevel: slacklogLevel });
-    nlp = nlpClient;
-    registry = serviceRegistry;
-    addAuthenticatedHandler(rtm, handleOnAuthenticated);
-    rtm.on('message', handleOnMessage);
+				try {
+					if (!res.intent || !res.intent[0] || !res.intent[0].value) {
+						throw new Error('Could not extract intent.');
+					}
 
-    return rtm;
-};
+					const intent = require('./intents/' + res.intent[0].value + 'Intent');
 
-module.exports.addAuthenicatedHanler = addAuthenticatedHandler;
+					intent.process(res, this._registry, this._log, (error, response) => {
+						if (error) {
+							this._log.error(error.message);
+							return;
+						}
+
+						return this._rtm.sendMessage(response, message.channel);
+					});
+
+				} catch (err) {
+					this._log.error(err);
+					this._log.error(res);
+					this._rtm.sendMessage('Sorry, I don\'t know what you are talking about!', message.channel);
+				}
+
+			});
+		}
+
+	}
+
+	start(handler) {
+		this._addAuthenticatedHandler(handler);
+		this._rtm.start();
+	}
+}
+
+module.exports = SlackClient;
