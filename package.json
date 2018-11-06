@@ -7,6 +7,13 @@
     "test": "NODE_EVN=test eslint bin server && nyc mocha --recursive test",
     "start": "node bin/run"
   },
+  "engines": {
+    "node": "10.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IgorDespot/orisa.git"
+  },
   "author": "Igor Despot",
   "license": "ISC",
   "dependencies": {
