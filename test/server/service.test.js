@@ -18,13 +18,12 @@ describe('The express service', () => {
 describe('PUT /service/:intent/:port', () => {
     it('should return HTTP 200 with valid result', (done) => {
         request(service)
-        .put('/service/test/999')
+        .put('/service/test/9999')
         .expect(200)
         .end((err, res) => {
-            if(err)
-                return done(err);
+            if(err) return done(err);
             res.body.result.should.startWith('test at');
-                return done();
+            return done();
         });
     });
 });

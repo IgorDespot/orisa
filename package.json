@@ -4,13 +4,14 @@
   "description": "Simple slack bot project for learning.",
   "main": "server/service.js",
   "scripts": {
-    "test": "nyc mocha --recursive test",
+    "test": "NODE_EVN=test eslint bin server && nyc mocha --recursive test",
     "start": "node bin/run"
   },
   "author": "Igor Despot",
   "license": "ISC",
   "dependencies": {
     "@slack/client": "^4.8.0",
+    "bunyan": "^1.8.12",
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "superagent": "^4.0.0-beta.5"
